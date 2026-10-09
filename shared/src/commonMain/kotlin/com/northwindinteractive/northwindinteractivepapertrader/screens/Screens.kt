@@ -1,6 +1,5 @@
 package com.northwindinteractive.northwindinteractivepapertrader.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,19 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,26 +30,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.AlpacaApiServiceImpl
 import com.northwindinteractive.northwindinteractivepapertrader.nav.Screen
+import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
+//import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.AuthViewModel
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.LoginUiState
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerDrawingModelInterpolator
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import io.ktor.util.collections.setValue
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import northwindinteractivepapertrader.shared.generated.resources.Res
 import northwindinteractivepapertrader.shared.generated.resources.ic_bell
+import northwindinteractivepapertrader.shared.generated.resources.ic_logout
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -157,32 +159,52 @@ import org.koin.compose.viewmodel.koinViewModel
     }
 
     @Composable
-    @Preview
-    fun PortfolioScreen(){
+    fun PortfolioScreen(viewModel: AuthViewModel = koinViewModel(), alpaca: AlpacaViewModel = koinViewModel(), navController: NavController){
+
+        val account by alpaca.account.collectAsState()
+
+        LaunchedEffect(Unit) {
+            alpaca.loadAccount()
+        }
+
         Column(modifier = Modifier.background(color = Color.White).padding(vertical = 48.dp)) {
             Row (
                 Modifier.fillMaxWidth().padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Spacer(modifier = Modifier.width(24.dp))
+                IconButton(
+                    onClick = {
+                        viewModel.sighOut()
+                        navController.navigate(Screen.Login.route)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_logout),
+                        contentDescription = "Sign out Button"
+                    )
+                }
                 Text(
                     "Paper Trading",
                     fontSize = 24.sp,
                     textAlign = TextAlign.Center
                 )
-                Image(
-                    painter = painterResource(Res.drawable.ic_bell),
-                    contentDescription = "Notification Bell Icon",
-                    alignment = Alignment.CenterEnd,
-                    colorFilter = ColorFilter.tint(Color.Black),
-                )
+                IconButton(
+                    onClick = {  }
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_bell),
+                        contentDescription = "Notification Bell Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             }
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     "Account Value"
                 )
                 Text(
-                    "$100,000",
+                    "${account?.portfolioValue}",
                     fontSize = 28.sp
                 )
                 Text(
@@ -198,12 +220,12 @@ import org.koin.compose.viewmodel.koinViewModel
                     horizontalArrangement = Arrangement.SpaceEvenly){
                     Column {
                         Text("Buying Power")
-                        Text("$100,000")
+                        Text("${account?.buyingPower}")
                     }
                     Spacer(modifier = Modifier.width(24.dp))
                     Column {
                         Text("Cash")
-                        Text("$100,000")
+                        Text("${account?.cash}")
                     }
 
                 }
@@ -243,3 +265,43 @@ import org.koin.compose.viewmodel.koinViewModel
             }
         }
     }
+
+@Composable
+fun AlpacaTestScreen() {
+
+    LaunchedEffect(Unit) {
+        val client = createAlpacaHttpClient()
+
+        try {
+            val service = AlpacaApiServiceImpl(
+                client = client,
+                apiKey = "PKEH4BZAYEJLFXCMWSSAHKZJZP",
+                secretKey = "AQtt82EFnVdXL5SYhptgbFpYvqY2ezmsj9gsPKib1dZ5"
+            )
+
+            val account = service.getAccount()
+
+            println("ALPACA ACCOUNT: $account")
+            println("PORTFOLIO VALUE: ${account.portfolioValue}")
+
+        } catch (e: Exception) {
+            println("ALPACA ERROR: ${e.message}")
+        } finally {
+            client.close()
+        }
+    }
+}
+
+fun createAlpacaHttpClient(): HttpClient {
+    return HttpClient {
+        expectSuccess = true
+
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    ignoreUnknownKeys = true
+                }
+            )
+        }
+    }
+}
