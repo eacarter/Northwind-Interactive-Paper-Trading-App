@@ -2,13 +2,11 @@ package com.northwindinteractive.northwindinteractivepapertrader.nav
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import com.northwindinteractive.northwindinteractivepapertrader.screens.AlpacaTestScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.LoginScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.PortfolioScreen
-import com.northwindinteractive.northwindinteractivepapertrader.screens.composables
 
 
 @Composable
@@ -16,7 +14,7 @@ fun PaperTraderNavHost(navController: NavHostController) {
 
     NavHost(navController, startDestination = Screen.Login.route) {
         composable(Screen.Portfolio.route) {
-            PortfolioScreen()
+            PortfolioScreen(navController = navController)
         }
 //        composable(
 //            Screen.MovieDetail.route,
