@@ -4,10 +4,17 @@ import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.Alpa
 import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepositoryImpl
 import com.northwindinteractive.northwindinteractivepapertrader.data.AuthRepositoryImpl
 import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepository
+import com.northwindinteractive.northwindinteractivepapertrader.data.FirestoreRepositoryImpl
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.AlpacaApiService
 import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.AuthRepository
+import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.FirestoreRepository
 //import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.AuthViewModel
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.auth.auth
+import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.firestore
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -17,6 +24,20 @@ import org.koin.dsl.module
 
 val firebaseModule = module {
 
+    single<FirebaseAuth>{
+        Firebase.auth
+    }
+
+    single<FirebaseFirestore>{
+        Firebase.firestore
+    }
+
+    single<FirestoreRepository>{
+        FirestoreRepositoryImpl(
+            firestore = get()
+        )
+    }
+
     single<AuthRepository> {
         AuthRepositoryImpl()
     }
@@ -25,7 +46,6 @@ val firebaseModule = module {
 val viewModelModule = module {
 
     viewModelOf(::AuthViewModel)
-//    viewModelOf(::AlpacaViewModel)
 
 }
 
@@ -42,18 +62,4 @@ val networkModule = module {
             }
         }
     }
-
-//    single<AlpacaApiService> {
-//        AlpacaApiServiceImpl(
-//            client = get(),
-//            apiKey = "PKEH4BZAYEJLFXCMWSSAHKZJZP",
-//            secretKey = "AQtt82EFnVdXL5SYhptgbFpYvqY2ezmsj9gsPKib1dZ5"
-//        )
-//    }
-//
-//    single<AlpacaRepository>{
-//        AlpacaRepositoryImpl(
-//            alpaca = get()
-//        )
-//    }
 }
