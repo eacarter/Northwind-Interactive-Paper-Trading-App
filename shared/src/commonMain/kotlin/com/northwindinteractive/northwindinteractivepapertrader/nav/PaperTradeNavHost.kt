@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.northwindinteractive.northwindinteractivepapertrader.screens.AlpacaTestScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.LoginScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.PortfolioScreen
+import com.northwindinteractive.northwindinteractivepapertrader.screens.SignUpScreen
 
 
 @Composable
@@ -35,6 +35,11 @@ fun PaperTraderNavHost(navController: NavHostController) {
 //                navController.navigate(Screen.MovieDetail.createRoute(movieId))
 //            })
 //        }
+        composable(Screen.SignUp.route) {
+            SignUpScreen(
+                navController = navController
+            )
+        }
         composable(Screen.Login.route){
             LoginScreen(
                 navController = navController
@@ -46,6 +51,7 @@ fun PaperTraderNavHost(navController: NavHostController) {
 sealed class Screen(val route: String) {
     object Login : Screen("login_view")
     object Portfolio : Screen("portfolio_view")
+    object SignUp : Screen("signup_view")
     object Research :Screen("research_view")
     object ResearchDetail : Screen("research_detail{id}"){
         fun createRoute(id: Int) = "research_detail/$id"

@@ -35,11 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.AlpacaApiServiceImpl
+import androidx.navigation.NavHostController
 import com.northwindinteractive.northwindinteractivepapertrader.nav.Screen
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
 //import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
@@ -47,11 +46,8 @@ import com.northwindinteractive.northwindinteractivepapertrader.presentation.Aut
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.LoginUiState
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerDrawingModelInterpolator
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import northwindinteractivepapertrader.shared.generated.resources.Res
+import northwindinteractivepapertrader.shared.generated.resources.ic_back
 import northwindinteractivepapertrader.shared.generated.resources.ic_bell
 import northwindinteractivepapertrader.shared.generated.resources.ic_logout
 import org.jetbrains.compose.resources.painterResource
@@ -59,12 +55,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
     @Composable
-//    @Preview
     fun LoginScreen(viewModel: AuthViewModel = koinViewModel(), navController: NavController){
 
         val state by viewModel.uiState.collectAsState()
 
-        var email by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("")}
         var pass by remember { mutableStateOf("")}
         var error by remember { mutableStateOf(false) }
 
@@ -117,7 +112,7 @@ import org.koin.compose.viewmodel.koinViewModel
                         )
                     },
                     onClick = {
-                        viewModel.signUp(email, pass)
+                        navController.navigate(Screen.SignUp.route)
                     }
                 )
             }
@@ -154,6 +149,88 @@ import org.koin.compose.viewmodel.koinViewModel
                 is LoginUiState.Error -> {
                     error = true
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun SignUpScreen(viewModel: AuthViewModel= koinViewModel(), navController: NavController){
+
+        var email by remember { mutableStateOf("")}
+        var pass by remember { mutableStateOf("")}
+        var apikey by remember { mutableStateOf("Optional")}
+        var secretkey by remember { mutableStateOf("Optional")}
+
+        Column(modifier = Modifier.fillMaxSize().background(Color.White),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            IconButton(
+                onClick = { navController.currentBackStack},
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_back),
+                    contentDescription = "Notification Bell Icon",
+                    tint = Color.Black,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+
+            Text(
+                "Northwind Interactive Paper Trading",
+                fontStyle = FontStyle.Normal,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(
+                onValueChange = { email = it },
+                value = email,
+                label = { Text("Email") },
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(
+                onValueChange = { pass = it },
+                value = pass,
+                label = { Text("Password") },
+                maxLines = 1,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(
+                onValueChange = { apikey = it },
+                value = apikey,
+                label = { Text("Alpaca Api Key") },
+                maxLines = 1,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(
+                onValueChange = { secretkey = it },
+                value = secretkey,
+                label = { Text("Alpaca Secret Key") },
+                maxLines = 1,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+            Row {
+                TextButton(
+                    modifier = Modifier.padding(16.dp),
+                    content = {
+                        Text(
+                            text = "Sign Up",
+                            fontSize = 24.sp
+                        )
+                    },
+                    onClick = {
+                        viewModel.signUp(email, pass, apikey = apikey, secretkey= secretkey)
+                        //TODO() write somthing to encode and decode api keys for network transmission
+                    }
+                )
             }
         }
     }
@@ -265,43 +342,3 @@ import org.koin.compose.viewmodel.koinViewModel
             }
         }
     }
-
-@Composable
-fun AlpacaTestScreen() {
-
-    LaunchedEffect(Unit) {
-        val client = createAlpacaHttpClient()
-
-        try {
-            val service = AlpacaApiServiceImpl(
-                client = client,
-                apiKey = "PKEH4BZAYEJLFXCMWSSAHKZJZP",
-                secretKey = "AQtt82EFnVdXL5SYhptgbFpYvqY2ezmsj9gsPKib1dZ5"
-            )
-
-            val account = service.getAccount()
-
-            println("ALPACA ACCOUNT: $account")
-            println("PORTFOLIO VALUE: ${account.portfolioValue}")
-
-        } catch (e: Exception) {
-            println("ALPACA ERROR: ${e.message}")
-        } finally {
-            client.close()
-        }
-    }
-}
-
-fun createAlpacaHttpClient(): HttpClient {
-    return HttpClient {
-        expectSuccess = true
-
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                }
-            )
-        }
-    }
-}

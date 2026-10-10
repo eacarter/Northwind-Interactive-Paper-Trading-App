@@ -7,7 +7,8 @@ interface AuthRepository {
 
     suspend fun signUp(
         email: String,
-        password: String
+        password: String,
+        keys: Map<String, String>
     ): Result<User>
 
     suspend fun signIn(
