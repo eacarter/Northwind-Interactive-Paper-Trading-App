@@ -91,6 +91,8 @@ kotlin {
                 libs.navigation3.ui
             )
 
+            implementation(libs.material3.adaptive.navigation.suite)
+
             // Logging
             implementation(libs.kermit)
             }

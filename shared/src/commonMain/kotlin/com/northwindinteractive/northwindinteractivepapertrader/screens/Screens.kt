@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,11 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -47,9 +51,14 @@ import com.northwindinteractive.northwindinteractivepapertrader.presentation.Log
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerDrawingModelInterpolator
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import northwindinteractivepapertrader.shared.generated.resources.Res
+import northwindinteractivepapertrader.shared.generated.resources.compose_multiplatform
+import northwindinteractivepapertrader.shared.generated.resources.ic_activity
+import northwindinteractivepapertrader.shared.generated.resources.ic_ai_spark
 import northwindinteractivepapertrader.shared.generated.resources.ic_back
 import northwindinteractivepapertrader.shared.generated.resources.ic_bell
+import northwindinteractivepapertrader.shared.generated.resources.ic_chevron_right
 import northwindinteractivepapertrader.shared.generated.resources.ic_logout
+import northwindinteractivepapertrader.shared.generated.resources.northwind_mark
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -239,15 +248,14 @@ import org.koin.compose.viewmodel.koinViewModel
     fun PortfolioScreen(viewModel: AuthViewModel = koinViewModel(), alpaca: AlpacaViewModel = koinViewModel(), navController: NavController){
 
         val account by alpaca.account.collectAsState()
+        val positions by alpaca.positions.collectAsState()
+        val portHistory by alpaca.portHistory.collectAsState()
 
-        LaunchedEffect(Unit) {
-            alpaca.loadAccount()
-        }
-
-        Column(modifier = Modifier.background(color = Color.White).padding(vertical = 48.dp)) {
+        Column(modifier = Modifier.background(color = Color.White).padding(vertical = 48.dp).fillMaxSize()) {
             Row (
                 Modifier.fillMaxWidth().padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ){
                 IconButton(
                     onClick = {
@@ -281,46 +289,62 @@ import org.koin.compose.viewmodel.koinViewModel
                     "Account Value"
                 )
                 Text(
-                    "${account?.portfolioValue}",
+                    "$${account?.portfolioValue}",
                     fontSize = 28.sp
                 )
                 Text(
-                    "+20,000",
+                    "$${portHistory?.profitLoss?.last()} (${portHistory?.profitLossPercent?.last()}%)",
                     fontSize = 12.sp
                 )
-                rememberLineCartesianLayer(
-                    drawingModelInterpolator = CartesianLayerDrawingModelInterpolator.line(sweep = true),
-                )
+                PortfolioChart(portHistory)
+                TimeRangeSelector(alpaca)
             }
             Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
                 Row (modifier= Modifier.fillMaxWidth().padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly){
                     Column {
                         Text("Buying Power")
-                        Text("${account?.buyingPower}")
+                        Text("$${account?.buyingPower}")
                     }
                     Spacer(modifier = Modifier.width(24.dp))
                     Column {
                         Text("Cash")
-                        Text("${account?.cash}")
+                        Text("$${account?.cash}")
                     }
 
                 }
             }
             Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
                 Row (modifier= Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly){
+                    horizontalArrangement = Arrangement.SpaceBetween){
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_ai_spark),
+                        contentDescription = "Notification Bell Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.padding(12.dp)
+                    )
                     Column {
-                        Text("Buying Power")
-                        Text("$100,000")
+                        Text(
+                            "AI Portfolio Summary",
+                            style = TextStyle(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Text(
+                            "Your portfolio is up 1.2% today, Tech exposure increased by 12% this week",
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                    Column {
-                        Text("Cash")
-                        Text("$100,000")
-                    }
-                    Column {
-                        Text("Cash")
-                        Text("$100,000")
+                    IconButton(
+                        onClick = {  }
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_chevron_right),
+                            contentDescription = "Notification Bell Icon",
+                            tint = Color.Black,
+                            modifier = Modifier.padding(12.dp)
+                        )
                     }
                 }
             }
@@ -337,8 +361,33 @@ import org.koin.compose.viewmodel.koinViewModel
                     onClick = {}
                 )
             }
-            LazyColumn {
-
+            LazyColumn (
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            ){
+                items(
+                    positions,
+                    key = { it.symbol }
+                ){ item ->
+                    Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_activity),
+                                contentDescription = "Notification Bell Icon",
+                                tint = Color.Black,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                            Column(verticalArrangement = Arrangement.SpaceEvenly) {
+                                Text(item.symbol)
+                            }
+                            Column(verticalArrangement = Arrangement.SpaceEvenly) {
+                                Text(item.avgEntryPrice)
+                                Text(item.pnlnc)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
