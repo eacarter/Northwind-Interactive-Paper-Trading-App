@@ -8,6 +8,7 @@ import com.northwindinteractive.northwindinteractivepapertrader.data.FirestoreRe
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.AlpacaApiService
 import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.AuthRepository
 import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.FirestoreRepository
+import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
 //import com.northwindinteractive.northwindinteractivepapertrader.presentation.AlpacaViewModel
 import com.northwindinteractive.northwindinteractivepapertrader.presentation.AuthViewModel
 import dev.gitlive.firebase.Firebase
@@ -19,6 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -40,6 +42,28 @@ val firebaseModule = module {
 
     single<AuthRepository> {
         AuthRepositoryImpl()
+    }
+}
+
+val alpacaModule = module{
+    single<AlpacaApiService> {
+        AlpacaApiServiceImpl(
+            client = get(),
+            apiKey = getProperty("alpacaApiKey"),
+            secretKey = getProperty("alpacaSecretKey")
+        )
+    }
+
+    single<AlpacaRepository> {
+        AlpacaRepositoryImpl(
+            alpaca = get()
+        )
+    }
+
+    viewModel {
+        AlpacaViewModel(
+            alpacaRepository = get()
+        )
     }
 }
 
