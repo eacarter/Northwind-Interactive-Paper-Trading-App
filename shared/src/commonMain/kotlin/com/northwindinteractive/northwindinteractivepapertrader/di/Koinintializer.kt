@@ -14,8 +14,8 @@ fun initKoin() {
             properties(
                 mapOf(
                     //TODO Alpaca api and secret keys go here for now
-                    "alpacaApiKey" to "PKEH4BZAYEJLFXCMWSSAHKZJZP",
-                    "alpacaSecretKey" to "AQtt82EFnVdXL5SYhptgbFpYvqY2ezmsj9gsPKib1dZ5"
+                    "alpacaApiKey" to "",
+                    "alpacaSecretKey" to ""
                 )
             )
             modules(
