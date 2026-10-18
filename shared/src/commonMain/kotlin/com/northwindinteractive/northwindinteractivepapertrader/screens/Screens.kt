@@ -1,6 +1,8 @@
 package com.northwindinteractive.northwindinteractivepapertrader.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,15 +12,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ScrollField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +48,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -58,6 +70,9 @@ import northwindinteractivepapertrader.shared.generated.resources.ic_back
 import northwindinteractivepapertrader.shared.generated.resources.ic_bell
 import northwindinteractivepapertrader.shared.generated.resources.ic_chevron_right
 import northwindinteractivepapertrader.shared.generated.resources.ic_logout
+import northwindinteractivepapertrader.shared.generated.resources.ic_microphone
+import northwindinteractivepapertrader.shared.generated.resources.ic_search
+import northwindinteractivepapertrader.shared.generated.resources.ic_star
 import northwindinteractivepapertrader.shared.generated.resources.northwind_mark
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,92 +87,91 @@ import org.koin.compose.viewmodel.koinViewModel
         var pass by remember { mutableStateOf("")}
         var error by remember { mutableStateOf(false) }
 
-        Column(modifier = Modifier.fillMaxSize().background(Color.White),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                "Northwind Interactive Paper Trading",
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedTextField(
-                onValueChange = {email = it},
-                value = email,
-                label = { Text("Email") },
-                maxLines = 1,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedTextField(
-                onValueChange = {pass = it},
-                value = pass,
-                label = { Text("Password") },
-                maxLines = 1,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-            Row {
-                TextButton(
-                    modifier = Modifier.padding(16.dp),
-                    content = {
-                        Text(
-                            text = "Login",
-                            fontSize = 24.sp
-                        )
-                    },
-                    onClick = {
-                        viewModel.signIn(email, pass)
-                    }
-                )
-                TextButton(
-                    modifier = Modifier.padding(16.dp),
-                    content = {
-                        Text(
-                            text = "SignUp",
-                            fontSize = 24.sp
-                        )
-                    },
-                    onClick = {
-                        navController.navigate(Screen.SignUp.route)
-                    }
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            if (error) {
-                Text(
-                    "Login Error, Try Again Later",
-                    color = Color.Red,
-                    textAlign = TextAlign.Center,
-                )
+        when (state) {
+            is LoginUiState.Success -> {
+                navController.navigate(Screen.Portfolio.route)
             }
 
-            when (state) {
-                is LoginUiState.Success -> {
-                    navController.navigate(Screen.Portfolio.route)
-                }
-
-                is LoginUiState.Loading -> {
-                    Box(
-                        Modifier.fillMaxSize().background(Color.White),
-                        contentAlignment = Alignment.Center
+            is LoginUiState.Loading -> {
+                Box(
+                    Modifier.fillMaxSize().background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                        CircularProgressIndicator()
                     }
                 }
-                is LoginUiState.Idle -> {
+            }
+            is LoginUiState.Idle -> {
+                Column(modifier = Modifier.fillMaxSize().background(Color.White),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "Northwind Interactive Paper Trading",
+                        fontStyle = FontStyle.Normal,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 32.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedTextField(
+                        onValueChange = { email = it },
+                        value = email,
+                        label = { Text("Email") },
+                        maxLines = 1,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedTextField(
+                        onValueChange = { pass = it },
+                        value = pass,
+                        label = { Text("Password") },
+                        maxLines = 1,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    )
+                    Row {
+                        TextButton(
+                            modifier = Modifier.padding(16.dp),
+                            content = {
+                                Text(
+                                    text = "Login",
+                                    fontSize = 24.sp
+                                )
+                            },
+                            onClick = {
+                                viewModel.signIn(email, pass)
+                            }
+                        )
+                        TextButton(
+                            modifier = Modifier.padding(16.dp),
+                            content = {
+                                Text(
+                                    text = "SignUp",
+                                    fontSize = 24.sp
+                                )
+                            },
+                            onClick = {
+                                navController.navigate(Screen.SignUp.route)
+                            }
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    if (error) {
+                        Text(
+                            "Login Error, Try Again Later",
+                            color = Color.Red,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
-                is LoginUiState.Error -> {
-                    error = true
-                }
+            }
+            is LoginUiState.Error -> {
+                error = true
             }
         }
     }
@@ -208,24 +222,24 @@ import org.koin.compose.viewmodel.koinViewModel
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedTextField(
-                onValueChange = { apikey = it },
-                value = apikey,
-                label = { Text("Alpaca Api Key") },
-                maxLines = 1,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedTextField(
-                onValueChange = { secretkey = it },
-                value = secretkey,
-                label = { Text("Alpaca Secret Key") },
-                maxLines = 1,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
+//            Spacer(modifier = Modifier.height(24.dp))
+//            OutlinedTextField(
+//                onValueChange = { apikey = it },
+//                value = apikey,
+//                label = { Text("Alpaca Api Key") },
+//                maxLines = 1,
+//                visualTransformation = PasswordVisualTransformation(),
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+//            )
+//            Spacer(modifier = Modifier.height(24.dp))
+//            OutlinedTextField(
+//                onValueChange = { secretkey = it },
+//                value = secretkey,
+//                label = { Text("Alpaca Secret Key") },
+//                maxLines = 1,
+//                visualTransformation = PasswordVisualTransformation(),
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+//            )
             Row {
                 TextButton(
                     modifier = Modifier.padding(16.dp),
@@ -237,7 +251,7 @@ import org.koin.compose.viewmodel.koinViewModel
                     },
                     onClick = {
                         viewModel.signUp(email, pass, apikey = apikey, secretkey= secretkey)
-                        //TODO() write somthing to encode and decode api keys for network transmission
+                        //TODO() this i changing to just they have to get there keys and store them locally
                     }
                 )
             }
@@ -250,13 +264,31 @@ import org.koin.compose.viewmodel.koinViewModel
         val account by alpaca.account.collectAsState()
         val positions by alpaca.positions.collectAsState()
         val portHistory by alpaca.portHistory.collectAsState()
+        val loading by alpaca.isLoading.collectAsState()
 
-        Column(modifier = Modifier.background(color = Color.White).padding(vertical = 48.dp).fillMaxSize()) {
-            Row (
+        val scrollState = rememberScrollState()
+
+        if(loading){
+            Box(
+                Modifier.fillMaxSize().background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+        else{
+        Column(modifier = Modifier.background(color = Color.White).padding(top = 48.dp, start= 12.dp, end= 12.dp ).fillMaxSize().verticalScroll(scrollState)) {
+            Row(
                 Modifier.fillMaxWidth().padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 IconButton(
                     onClick = {
                         viewModel.sighOut()
@@ -274,7 +306,7 @@ import org.koin.compose.viewmodel.koinViewModel
                     textAlign = TextAlign.Center
                 )
                 IconButton(
-                    onClick = {  }
+                    onClick = { }
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_bell),
@@ -294,14 +326,17 @@ import org.koin.compose.viewmodel.koinViewModel
                 )
                 Text(
                     "$${portHistory?.profitLoss?.last()} (${portHistory?.profitLossPercent?.last()}%)",
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+//                    color = if (portHistory?.profitLoss?.last()!!.toFloat() < 0 && portHistory?.profitLoss?.last() != null) Color.Red else Color.Green
                 )
                 PortfolioChart(portHistory)
                 TimeRangeSelector(alpaca)
             }
-            Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
-                Row (modifier= Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly){
+            Card(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     Column {
                         Text("Buying Power")
                         Text("$${account?.buyingPower}")
@@ -314,9 +349,12 @@ import org.koin.compose.viewmodel.koinViewModel
 
                 }
             }
-            Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
-                Row (modifier= Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween){
+            Card(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_ai_spark),
                         contentDescription = "Notification Bell Icon",
@@ -337,7 +375,7 @@ import org.koin.compose.viewmodel.koinViewModel
                         )
                     }
                     IconButton(
-                        onClick = {  }
+                        onClick = { }
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_chevron_right),
@@ -352,42 +390,251 @@ import org.koin.compose.viewmodel.koinViewModel
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     "Positions"
                 )
                 TextButton(
-                    content = {Text("See All")},
+                    content = { Text("See All") },
                     onClick = {}
                 )
             }
-            LazyColumn (
-                modifier = Modifier.fillMaxWidth().weight(1f)
-            ){
-                items(
-                    positions,
-                    key = { it.symbol }
-                ){ item ->
-                    Card (modifier= Modifier.fillMaxWidth().padding(12.dp)){
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_activity),
-                                contentDescription = "Notification Bell Icon",
-                                tint = Color.Black,
-                                modifier = Modifier.padding(12.dp)
+
+            if (positions.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                ) {
+                    items(
+                        positions,
+                        key = { it.symbol }
+                    ) { item ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp).clickable(
+                                onClick = {
+                                    navController.navigate(Screen.ResearchDetail.route)
+                                }
                             )
-                            Column(verticalArrangement = Arrangement.SpaceEvenly) {
-                                Text(item.symbol)
-                            }
-                            Column(verticalArrangement = Arrangement.SpaceEvenly) {
-                                Text(item.avgEntryPrice)
-                                Text(item.pnlnc)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(18.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(verticalArrangement = Arrangement.SpaceEvenly) {
+                                    Text(item.symbol)
+                                }
+                                Column(verticalArrangement = Arrangement.SpaceEvenly) {
+                                    Text(item.avgEntryPrice)
+                                    Text(
+                                        item.pnlnc,
+                                        color = if (item.pnlnc.toFloat() < 0) Color.Red else Color.Green
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+            else{
+                Column (modifier = Modifier.fillMaxWidth().padding(12.dp)){
+                    Text("Head over to the research tab and start trading")
+                }
+            }
+        }
+
         }
     }
+@Composable
+fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: NavController){
+
+    val watchList by alpaca.watchList.collectAsState()
+
+    val selection : List<Unit> = listOf(WatchListComponent(list= watchList))
+
+    var i by remember {mutableStateOf(0)}
+    val scrollState = rememberScrollState()
+    var search by remember { mutableStateOf("")}
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(top = 48.dp, start = 12.dp, end = 12.dp)
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_search),
+                    contentDescription = "Search Icon",
+                    tint = Color.White,
+                )
+            },
+            trailingIcon = {
+                FloatingActionButton(
+                    modifier = Modifier.size(24.dp),
+                    containerColor = Color.Blue,
+                    shape = CircleShape,
+                    onClick = {/**TODO: text to speech**/ },
+                    content = {
+                        Icon(
+                            modifier = Modifier.size(18.dp),
+                            painter = painterResource(Res.drawable.ic_microphone),
+                            contentDescription = "Search Icon",
+                            tint = Color.White,
+                        )
+                    }
+                )
+            },
+            onValueChange = { search = it },
+            value = search,
+            label = { Text("") },
+            placeholder = { Text(
+                "Search symbols, companies, or ask AI",
+                overflow = TextOverflow.Ellipsis
+            ) },
+            maxLines = 1,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        )
+
+        //TODO: since no popular, or etf endpoint exist, im turning this into scroable watchlist row
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(6.dp).horizontalScroll(scrollState),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+            Button(
+                onClick = {
+                    i = 0
+                }
+            ){
+                Text(
+                    "Watchlist",
+                    fontSize = 12.sp
+                )
+            }
+            Button(
+                onClick = {}
+            ){
+                Text("AI Scanner",
+                    fontSize = 12.sp)
+            }
+            Button(
+                onClick = {}
+            ){
+                Text("Popular",
+                    fontSize = 12.sp)
+            }
+            Button(
+                onClick = {}
+            ){
+                Text("ETF",
+                    fontSize = 12.sp)
+            }
+        }
+        selection[i]
+    }
+}
+
+@Composable
+@Preview
+fun ResearchDetail(/*onBackClick: () -> Unit*/){
+    Column(modifier = Modifier.background(Color.White).fillMaxSize().padding(top= 48.dp, start = 12.dp, end= 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            IconButton(
+                onClick = { }
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_back),
+                    contentDescription = "Notification Bell Icon",
+                    tint = Color.Black,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+            Row {
+                IconButton(
+                    onClick = { }
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_bell),
+                        contentDescription = "Notification Bell Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                IconButton(
+                    onClick = { }
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_star),
+                        contentDescription = "Notification Bell Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+        }
+        Text("NVDA")
+        Text("Price")
+        Text("Change")
+        //TODO: Graph local
+        Card( modifier = Modifier.fillMaxWidth().padding (12.dp)) {
+            Text("Your Position")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                Column (){
+                    Text("Shares")
+                    Text("10")
+                }
+                Column (){
+                    Text("Avg Cost")
+                    Text("$123.43")
+                }
+                Column (){
+                    Text("Market Value")
+                    Text("$1234.20")
+                }
+            }
+        }
+
+        Card( modifier = Modifier.fillMaxWidth().padding (12.dp)) {
+            Text("Unrealized P and L Goes in this card")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                Column (){
+                    Text("Shares")
+                    Text("10")
+                }
+                Column (){
+                    Text("Avg Cost")
+                    Text("$123.43")
+                }
+                Column (){
+                    Text("Market Value")
+                    Text("$1234.20")
+                }
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth()){
+            Button(
+                modifier = Modifier.fillMaxWidth(.5f),
+                onClick = {}
+            ){
+                Text("BUY")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(.5f),
+                onClick = {}
+            ){
+                Text("Sell")
+            }
+        }
+
+    }
+}

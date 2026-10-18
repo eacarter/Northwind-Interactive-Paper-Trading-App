@@ -4,9 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class WatchListDto(
-    val id : String,
-    val name : String,
+data class ListItemDto(
+    val id :String,
+    val name: String,
+    val assets : List<AssetDto>,
+
     @SerialName("account_id")
-    val accountId: String
+    val accountId : String
 )

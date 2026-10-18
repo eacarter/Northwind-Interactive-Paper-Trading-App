@@ -1,8 +1,10 @@
 package com.northwindinteractive.northwindinteractivepapertrader.data.alpaca
 
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.ListItemDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto
 
 interface AlpacaApiService {
     suspend fun getAccount(): AlpacaAccountDto
@@ -11,7 +13,7 @@ interface AlpacaApiService {
     suspend fun openPosition()
     suspend fun getPortfolioHistory(period: String, timeframe:String): PortfolioHistoryDto
 //
-//    suspend fun getWatchList() : List<PositionDto>
+    suspend fun getWatchList() : List<WatchListItemDto>
 //    suspend fun getStock(symbol: String): PositionDto
-//    suspend fun getPopularStocks() : List<PositionDto>
+    suspend fun getPopularStocks() : List<ListItemDto>
 }

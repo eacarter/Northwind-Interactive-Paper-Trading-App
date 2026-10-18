@@ -6,9 +6,11 @@ import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.mode
 import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepository
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlin.coroutines.cancellation.CancellationException
 
 class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewModel(){
@@ -16,10 +18,12 @@ class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewMode
     private val _account = MutableStateFlow<AlpacaAccountDto?>(null)
     private val _positions = MutableStateFlow<List<PositionItemDto>>(emptyList())
     private val _portHistory = MutableStateFlow<PortfolioHistoryDto?>(null)
+    private val _watchList = MutableStateFlow<List<WatchListItemDto>>(emptyList())
 
     val account = _account.asStateFlow()
     val positions = _positions.asStateFlow()
     val portHistory = _portHistory.asStateFlow()
+    val watchList = _watchList.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -31,17 +35,35 @@ class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewMode
         refreshPortfolio()
     }
 
-    fun refreshPortfolio() {
-        loadAccount()
-        loadPositions()
-        loadPortfolioHistory()
-    }
-
-    fun loadAccount() {
+    fun refreshPortfolio(period: String = "1M", timeframe: String = "1D") {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
 
+            try{
+                supervisorScope {
+                    launch{
+                        loadAccount()
+                    }
+                    launch{
+                        loadPositions()
+                    }
+                    launch{
+                        loadPortfolioHistory(period, timeframe)
+                    }
+                    launch{
+                        loadWatchList()
+                    }
+                }
+            }
+            finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadAccount() {
+        viewModelScope.launch {
             try {
                 _account.value = alpacaRepository.getAccount()
                 print("Account: ${_account.value!!.portfolioValue}")
@@ -71,11 +93,28 @@ class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewMode
         }
     }
 
-    fun loadPortfolioHistory(period: String = "1M", timeframe: String = "1D"){
+    fun loadPortfolioHistory(period: String, timeframe: String){
         viewModelScope.launch{
             try {
                 val result = alpacaRepository.getPortfolioHistory(period, timeframe)
                 _portHistory.value = result
+            } catch (e: CancellationException) {
+                println("CANCELLED: ${e.message}")
+                throw e
+
+            } catch (e: Exception) {
+                println("ERROR: ${e.message}")
+                e.printStackTrace()
+                _error.value = e.message ?: "Unable to load positions"
+            }
+        }
+    }
+
+    fun loadWatchList(){
+        viewModelScope.launch {
+            try {
+                val result = alpacaRepository.getWatchList()
+                _watchList.value = result
             } catch (e: CancellationException) {
                 println("CANCELLED: ${e.message}")
                 throw e

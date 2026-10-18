@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class WatchListItemDto(
-    val id :String,
-    val name: String,
-    val assets : List<AssetDto>,
-
+    val id : String,
+    val name : String,
     @SerialName("account_id")
-    val accountId : String
+    val accountId: String,
+    @SerialName("created_at")
+    val createdDate: String
 )
