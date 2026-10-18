@@ -2,8 +2,10 @@ package com.northwindinteractive.northwindinteractivepapertrader.data.alpaca
 
 import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepository
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.ListItemDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -67,15 +69,23 @@ class AlpacaApiServiceImpl( private val client: HttpClient,
 
     }
 
-//    override suspend fun getWatchList(): List<PositionDto> {
-//        TODO("Not yet implemented")
-//    }
-//
+    override suspend fun getWatchList(): List<WatchListItemDto> {
+        val response = client.get("$baseUrl/v2/watchlists") {
+            header("APCA-API-KEY-ID", apiKey)
+            header("APCA-API-SECRET-KEY", secretKey)
+        }
+
+        println("HTTP Status: ${response.status}")
+        println("Raw Response: ${response.bodyAsText()}")
+
+        return response.body()
+    }
+
+    override suspend fun getPopularStocks(): List<ListItemDto> {
+        TODO("Not yet implemented")
+    }
+
 //    override suspend fun getStock(symbol: String): PositionDto {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override suspend fun getPopularStocks(): List<PositionDto> {
 //        TODO("Not yet implemented")
 //    }
 }

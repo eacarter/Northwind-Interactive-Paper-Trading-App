@@ -2,20 +2,36 @@ package com.northwindinteractive.northwindinteractivepapertrader.nav
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.northwindinteractive.northwindinteractivepapertrader.screens.LoginScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.PortfolioScreen
+import com.northwindinteractive.northwindinteractivepapertrader.screens.ResearchDetail
+import com.northwindinteractive.northwindinteractivepapertrader.screens.ResearchScreen
 import com.northwindinteractive.northwindinteractivepapertrader.screens.SignUpScreen
 
 
 @Composable
 fun PaperTraderNavHost(navController: NavHostController) {
 
-    NavHost(navController, startDestination = Screen.Login.route) {
+    NavHost(navController, startDestination = Screen.Portfolio.route) {
         composable(Screen.Portfolio.route) {
             PortfolioScreen(navController = navController)
         }
+        composable(Screen.Research.route) {
+            ResearchScreen(navController = navController)
+        }
+        composable(
+            Screen.ResearchDetail.route,
+            arguments = listOf(navArgument("id"){type = NavType.StringType})
+        ) {
+            ResearchDetail()
+        }
+//        composable(Screen.Search.route) {
+//
+//        }
 //        composable(
 //            Screen.MovieDetail.route,
 //            arguments = listOf(navArgument("movieId") { type = NavType.IntType })

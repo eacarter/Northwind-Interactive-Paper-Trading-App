@@ -4,6 +4,7 @@ import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.Alpa
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto
 
 class AlpacaRepositoryImpl(private val alpaca : AlpacaApiService) : AlpacaRepository{
     override suspend fun getAccount(): AlpacaAccountDto {
@@ -30,9 +31,9 @@ class AlpacaRepositoryImpl(private val alpaca : AlpacaApiService) : AlpacaReposi
     }
 
 
-//    override suspend fun getWatchList(): List<PositionDto> {
-//        TODO("Not yet implemented")
-//    }
+    override suspend fun getWatchList(): List<WatchListItemDto> {
+        return alpaca.getWatchList()
+    }
 //
 //    override suspend fun getStock(symbol: String): PositionDto {
 //        TODO("Not yet implemented")
