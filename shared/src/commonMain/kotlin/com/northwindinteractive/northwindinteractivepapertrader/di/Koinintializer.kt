@@ -15,7 +15,8 @@ fun initKoin() {
                 mapOf(
                     //TODO Alpaca api and secret keys go here for now
                     "alpacaApiKey" to "",
-                    "alpacaSecretKey" to ""
+                    "alpacaSecretKey" to "",
+                    "aiApiKey" to ""
                 )
             )
             modules(

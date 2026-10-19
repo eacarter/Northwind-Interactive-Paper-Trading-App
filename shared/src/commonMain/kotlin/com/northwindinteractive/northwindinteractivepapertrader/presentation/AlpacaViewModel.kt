@@ -3,7 +3,7 @@ package com.northwindinteractive.northwindinteractivepapertrader.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
-import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepository
+import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.AlpacaRepository
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto

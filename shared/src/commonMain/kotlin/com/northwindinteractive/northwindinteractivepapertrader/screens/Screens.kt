@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -449,8 +450,6 @@ fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: Nav
 
     val watchList by alpaca.watchList.collectAsState()
 
-    val selection : List<Unit> = listOf(WatchListComponent(list= watchList))
-
     var i by remember {mutableStateOf(0)}
     val scrollState = rememberScrollState()
     var search by remember { mutableStateOf("")}
@@ -472,7 +471,7 @@ fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: Nav
                     modifier = Modifier.size(24.dp),
                     containerColor = Color.Blue,
                     shape = CircleShape,
-                    onClick = {/**TODO: text to speech**/ },
+                    onClick = { /**TODO: text to speech**/ },
                     content = {
                         Icon(
                             modifier = Modifier.size(18.dp),
@@ -486,51 +485,50 @@ fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: Nav
             onValueChange = { search = it },
             value = search,
             label = { Text("") },
-            placeholder = { Text(
-                "Search symbols, companies, or ask AI",
-                overflow = TextOverflow.Ellipsis
-            ) },
-            maxLines = 1,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-        )
-
-        //TODO: since no popular, or etf endpoint exist, im turning this into scroable watchlist row
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(6.dp).horizontalScroll(scrollState),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ){
-            Button(
-                onClick = {
-                    i = 0
-                }
-            ){
+            placeholder = {
                 Text(
-                    "Watchlist",
-                    fontSize = 12.sp
+                    "Search symbols, companies, or ask AI",
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-            Button(
-                onClick = {}
-            ){
-                Text("AI Scanner",
-                    fontSize = 12.sp)
-            }
-            Button(
-                onClick = {}
-            ){
-                Text("Popular",
-                    fontSize = 12.sp)
-            }
-            Button(
-                onClick = {}
-            ){
-                Text("ETF",
-                    fontSize = 12.sp)
+            },
+            maxLines = 1,
+        )
+        if(watchList.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(6.dp).horizontalScroll(scrollState),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                items(
+                    watchList,
+                    key = { it.id }
+                ) { item ->
+                    Button(
+                        onClick = {
+
+                        }
+                    ) {
+                        Text(
+                            item.name,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
             }
         }
-        selection[i]
+        else{
+            Column(
+                modifier= Modifier.fillMaxSize().padding(12.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No watchlist available")
+                TextButton(
+                    onClick = {},
+                    content = {Text("Click here to create your first")}
+                )
+            }
+        }
     }
 }
 
