@@ -1,8 +1,7 @@
 package com.northwindinteractive.northwindinteractivepapertrader.data.alpaca
 
-import com.northwindinteractive.northwindinteractivepapertrader.data.AlpacaRepository
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
-import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.ListItemDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AssetDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.WatchListItemDto
@@ -81,11 +80,16 @@ class AlpacaApiServiceImpl( private val client: HttpClient,
         return response.body()
     }
 
-    override suspend fun getPopularStocks(): List<ListItemDto> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getStock(symbol: String): AssetDto {
+        val response = client.get("$baseUrl/v2/assets/") {
+            header("APCA-API-KEY-ID", apiKey)
+            header("APCA-API-SECRET-KEY", secretKey)
+            parameter("symbol", symbol)
+        }
 
-//    override suspend fun getStock(symbol: String): PositionDto {
-//        TODO("Not yet implemented")
-//    }
+        println("HTTP Status: ${response.status}")
+        println("Raw Response: ${response.bodyAsText()}")
+
+        return response.body()
+    }
 }
