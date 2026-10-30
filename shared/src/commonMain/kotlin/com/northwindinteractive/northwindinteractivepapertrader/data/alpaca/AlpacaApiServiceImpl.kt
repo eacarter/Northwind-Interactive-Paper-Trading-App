@@ -42,6 +42,18 @@ class AlpacaApiServiceImpl( private val client: HttpClient,
         return response.body()
     }
 
+    override suspend fun getPosition(id: String): PositionItemDto{
+        val response = client.get("$baseUrl/v2/positions/$id") {
+            header("APCA-API-KEY-ID", apiKey)
+            header("APCA-API-SECRET-KEY", secretKey)
+        }
+
+        println("HTTP Status: ${response.status}")
+        println("Raw Response: ${response.bodyAsText()}")
+
+        return response.body()
+    }
+
     override suspend fun closePosition(id: String) {
         TODO("Not yet implemented")
     }

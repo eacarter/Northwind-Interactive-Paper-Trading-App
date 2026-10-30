@@ -10,6 +10,7 @@ import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.mode
 interface AlpacaApiService {
     suspend fun getAccount(): AlpacaAccountDto
     suspend fun getPositions() : List<PositionItemDto>
+    suspend fun getPosition(id: String): PositionItemDto
     suspend fun closePosition(id: String)
     suspend fun openPosition()
     suspend fun getPortfolioHistory(period: String, timeframe:String): PortfolioHistoryDto

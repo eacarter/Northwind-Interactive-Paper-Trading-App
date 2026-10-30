@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -446,7 +447,7 @@ import org.koin.compose.viewmodel.koinViewModel
         }
     }
 @Composable
-fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: NavController){
+fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel()){
 
     val watchList by alpaca.watchList.collectAsState()
 
@@ -533,15 +534,26 @@ fun ResearchScreen(alpaca: AlpacaViewModel = koinViewModel(), navController: Nav
 }
 
 @Composable
-@Preview
-fun ResearchDetail(/*onBackClick: () -> Unit*/){
+fun ResearchDetail(onBackClick: () -> Unit, alpaca: AlpacaViewModel = koinViewModel()){
+
+    val periods = listOf("1D", "1W", "1M", "3M", "1Y", "ALL")
+    val scrollState = rememberScrollState()
+
+//    LaunchedEffect(id){
+//        alpaca.getStock(id)
+//    }
+
+
+    val stock by alpaca.position.collectAsState()
+
     Column(modifier = Modifier.background(Color.White).fillMaxSize().padding(top= 48.dp, start = 12.dp, end= 12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ){
             IconButton(
-                onClick = { }
+                onClick = onBackClick
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_back),
@@ -549,6 +561,14 @@ fun ResearchDetail(/*onBackClick: () -> Unit*/){
                     tint = Color.Black,
                     modifier = Modifier.padding(12.dp)
                 )
+            }
+            Column(
+                modifier= Modifier.fillMaxWidth(.6f),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("${stock?.symbol}")
+                Text("${stock?.name}")
             }
             Row {
                 IconButton(
@@ -573,66 +593,92 @@ fun ResearchDetail(/*onBackClick: () -> Unit*/){
                 }
             }
         }
-        Text("NVDA")
-        Text("Price")
-        Text("Change")
-        //TODO: Graph local
-        Card( modifier = Modifier.fillMaxWidth().padding (12.dp)) {
-            Text("Your Position")
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            Column (
+                modifier= Modifier.padding(12.dp)
             ){
-                Column (){
-                    Text("Shares")
-                    Text("10")
-                }
-                Column (){
-                    Text("Avg Cost")
-                    Text("$123.43")
-                }
-                Column (){
-                    Text("Market Value")
-                    Text("$1234.20")
-                }
-            }
-        }
+                Text(
+                    "$182.32",
+                    fontSize = 36.sp
+                )
+                Text(
+                    "+3.91 (+2.17%)",
+                    fontSize = 18.sp,
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(6.dp).horizontalScroll(scrollState),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    items(
+                        periods,
+                    ) { item ->
+                        Button(
+                            onClick = {
 
-        Card( modifier = Modifier.fillMaxWidth().padding (12.dp)) {
-            Text("Unrealized P and L Goes in this card")
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ){
-                Column (){
-                    Text("Shares")
-                    Text("10")
+                            }
+                        ) {
+                            Text(
+                                item,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
-                Column (){
-                    Text("Avg Cost")
-                    Text("$123.43")
-                }
-                Column (){
-                    Text("Market Value")
-                    Text("$1234.20")
-                }
-            }
-        }
 
-        Row(modifier = Modifier.fillMaxWidth()){
-            Button(
-                modifier = Modifier.fillMaxWidth(.5f),
-                onClick = {}
-            ){
-                Text("BUY")
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(.5f),
-                onClick = {}
-            ){
-                Text("Sell")
-            }
-        }
 
+                //TODO: Graph local
+                Card(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                    Text("Your Position")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column() {
+                            Text("Shares")
+                            Text("10")
+                        }
+                        Column() {
+                            Text("Avg Cost")
+                            Text("$123.43")
+                        }
+                        Column() {
+                            Text("Market Value")
+                            Text("$1234.20")
+                        }
+                    }
+                }
+
+                Card(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column() {
+                            Text("Unrealized P/L")
+                            Text("10")
+                        }
+                        Column() {
+                            Text("Allocation")
+                            Text("$123.43")
+                        }
+                    }
+                }
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        modifier = Modifier.fillMaxWidth(.5f),
+                        onClick = {}
+                    ) {
+                        Text("BUY")
+                    }
+                    Button(
+                        modifier = Modifier.fillMaxWidth(1f),
+                        onClick = {}
+                    ) {
+                        Text("SELL")
+                    }
+                }
+            }
     }
 }

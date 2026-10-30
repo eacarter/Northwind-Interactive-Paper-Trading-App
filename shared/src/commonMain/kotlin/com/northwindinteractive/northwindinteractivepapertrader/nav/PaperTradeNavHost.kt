@@ -21,13 +21,15 @@ fun PaperTraderNavHost(navController: NavHostController) {
             PortfolioScreen(navController = navController)
         }
         composable(Screen.Research.route) {
-            ResearchScreen(navController = navController)
+            ResearchScreen(/*id ->
+                navController.navigate(Screen.ResearchDetail.createRoute(id))*/
+            )
         }
         composable(
             Screen.ResearchDetail.route,
             arguments = listOf(navArgument("id"){type = NavType.StringType})
         ) {
-            ResearchDetail()
+            ResearchDetail(onBackClick = { navController.popBackStack() })
         }
 //        composable(Screen.Search.route) {
 //

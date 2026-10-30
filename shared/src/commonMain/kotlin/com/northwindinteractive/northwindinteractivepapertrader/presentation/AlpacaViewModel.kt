@@ -3,6 +3,7 @@ package com.northwindinteractive.northwindinteractivepapertrader.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AlpacaAccountDto
+import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.AssetDto
 import com.northwindinteractive.northwindinteractivepapertrader.domain.repository.AlpacaRepository
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PortfolioHistoryDto
 import com.northwindinteractive.northwindinteractivepapertrader.data.alpaca.models.PositionItemDto
@@ -19,11 +20,13 @@ class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewMode
     private val _positions = MutableStateFlow<List<PositionItemDto>>(emptyList())
     private val _portHistory = MutableStateFlow<PortfolioHistoryDto?>(null)
     private val _watchList = MutableStateFlow<List<WatchListItemDto>>(emptyList())
+    private val _position = MutableStateFlow<AssetDto?>(null)
 
     val account = _account.asStateFlow()
     val positions = _positions.asStateFlow()
     val portHistory = _portHistory.asStateFlow()
     val watchList = _watchList.asStateFlow()
+    val position = _position.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -115,6 +118,23 @@ class AlpacaViewModel (private val alpacaRepository: AlpacaRepository): ViewMode
             try {
                 val result = alpacaRepository.getWatchList()
                 _watchList.value = result
+            } catch (e: CancellationException) {
+                println("CANCELLED: ${e.message}")
+                throw e
+
+            } catch (e: Exception) {
+                println("ERROR: ${e.message}")
+                e.printStackTrace()
+                _error.value = e.message ?: "Unable to load positions"
+            }
+        }
+    }
+
+    fun getStock(id: String){
+        viewModelScope.launch {
+            try{
+                val result = alpacaRepository.getStock(id)
+                _position.value = result
             } catch (e: CancellationException) {
                 println("CANCELLED: ${e.message}")
                 throw e
